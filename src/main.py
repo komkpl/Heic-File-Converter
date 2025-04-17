@@ -42,11 +42,11 @@ def main(page: ft.Page):
     progress_text = ft.Text(value="Progress: 0 / 0")
     selected_files = ft.Text()
     converted_files = ft.Column(
-        controls=[ft.Text("No History", italic=True, color=ft.colors.GREY)],
+        controls=[ft.Text("No history", italic=True, color=ft.colors.GREY)],
         spacing=5, 
         scroll=ft.ScrollMode.AUTO,
         )
-    selected_files.value = "No files selected"
+    selected_files.value = "No files are selected"
 
     extensions = [
         "jpg",
@@ -55,17 +55,31 @@ def main(page: ft.Page):
         "tiff",
     ]
     selected_extension = ft.Ref[ft.Dropdown]()
+
+    snackbar = ft.SnackBar(
+        content=ft.Text("No files are selected"),
+        bgcolor=ft.colors.TEAL_400,
+        duration=2000, # ミリ秒
+    )
+    page.snack_bar = snackbar
+    page.overlay.append(snackbar)
+
+    page.update()
+
+    def show_snackbar(message: str, bgcolor=ft.colors.TEAL_400):
+        snackbar.content = ft.Text(message)
+        snackbar.bgcolor = bgcolor
+        snackbar.open = True
+        page.update()
     
     def pick_files_result(e: ft.FilePickerResultEvent):
         if not e.files:
-            selected_files.value = "Cancelled"
-            page.update()
             return
         
         selected_files.value = "\n".join(f.name for f in e.files)
         selected_paths.clear()
         selected_paths.extend(f.path for f in e.files)
-        print(f"選択されたファイル: {selected_files.value}")
+        print(f"Selected files: {selected_files.value}")
 
         # 進捗バーの初期化
         progress_bar.value = 0
@@ -77,8 +91,9 @@ def main(page: ft.Page):
     def convert_button_clicked(e):
         total = len(selected_paths)
         if total == 0:
-            converted_files.controls.clear()
-            converted_files.controls.append(ft.Text("No files selected"))
+            page.snack_bar = snackbar
+            show_snackbar("No files are selected")
+            page.update()
             return
 
         output_extention = selected_extension.current.value or "jpg"
@@ -95,8 +110,10 @@ def main(page: ft.Page):
                 converted_files.controls.append(btn)
 
             except Exception as e:
-                print(f"変換失敗: {path} -> {e}")
-                converted_files.controls.append(ft.Text(f"変換失敗: {path} -> {e}", color=ft.colors.RED))
+                print(f"Conversion failed: {path} -> {e}")
+                converted_files.controls.append(ft.Text(f"Conversion failed: {path} -> {e}", color=ft.colors.RED))
+                show_snackbar(f"Error converting {path}: {e}", bgcolor=ft.colors.RED_400)
+                page.update()
                 return
             
             # 進捗更新
@@ -112,7 +129,8 @@ def main(page: ft.Page):
     
     def clear_converted_files():
         converted_files.controls.clear()
-        converted_files.controls.append(ft.Text("No History", italic=True, color=ft.colors.GREY))
+        converted_files.controls.append(ft.Text("No history", italic=True, color=ft.colors.GREY))
+        show_snackbar("History cleared successfully")
         page.update()
 
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
@@ -185,4 +203,4 @@ def main(page: ft.Page):
 
 
 
-ft.app(main)
+ft.app(target=main)
