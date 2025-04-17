@@ -42,7 +42,7 @@ def main(page: ft.Page):
     progress_text = ft.Text(value="Progress: 0 / 0")
     selected_files = ft.Text()
     converted_files = ft.Column(
-        controls=[ft.Text("No history", italic=True, color=ft.colors.GREY)],
+        controls=[ft.Text("No history", italic=True, color=ft.Colors.GREY)],
         spacing=5, 
         scroll=ft.ScrollMode.AUTO,
         )
@@ -58,7 +58,7 @@ def main(page: ft.Page):
 
     snackbar = ft.SnackBar(
         content=ft.Text("No files are selected"),
-        bgcolor=ft.colors.TEAL_400,
+        bgcolor=ft.Colors.TEAL_400,
         duration=2000, # ミリ秒
     )
     page.snack_bar = snackbar
@@ -66,7 +66,7 @@ def main(page: ft.Page):
 
     page.update()
 
-    def show_snackbar(message: str, bgcolor=ft.colors.TEAL_400):
+    def show_snackbar(message: str, bgcolor=ft.Colors.TEAL_400):
         snackbar.content = ft.Text(message)
         snackbar.bgcolor = bgcolor
         snackbar.open = True
@@ -97,6 +97,9 @@ def main(page: ft.Page):
             return
 
         output_extention = selected_extension.current.value or "jpg"
+        print(converted_files.controls[0])
+        if "No history" == converted_files.controls[0].value:
+            converted_files.controls.clear()
         for i, path in enumerate(selected_paths, start=1):
             try:
                 output_path = convert_heic_to_others(path, output_extention)
@@ -105,14 +108,14 @@ def main(page: ft.Page):
                 btn = ft.TextButton(
                     text=str(output_path),
                     on_click=lambda e, p=output_path: open_file(p),
-                    style=ft.ButtonStyle(color=ft.colors.BLUE, overlay_color=ft.colors.BLUE_100),
+                    style=ft.ButtonStyle(color=ft.Colors.BLUE, overlay_color=ft.Colors.BLUE_100),
                 )
                 converted_files.controls.append(btn)
 
             except Exception as e:
                 print(f"Conversion failed: {path} -> {e}")
-                converted_files.controls.append(ft.Text(f"Conversion failed: {path} -> {e}", color=ft.colors.RED))
-                show_snackbar(f"Error converting {path}: {e}", bgcolor=ft.colors.RED_400)
+                converted_files.controls.append(ft.Text(f"Conversion failed: {path} -> {e}", color=ft.Colors.RED))
+                show_snackbar(f"Error converting {path}: {e}", bgcolor=ft.Colors.RED_400)
                 page.update()
                 return
             
@@ -129,7 +132,7 @@ def main(page: ft.Page):
     
     def clear_converted_files():
         converted_files.controls.clear()
-        converted_files.controls.append(ft.Text("No history", italic=True, color=ft.colors.GREY))
+        converted_files.controls.append(ft.Text("No history", italic=True, color=ft.Colors.GREY))
         show_snackbar("History cleared successfully")
         page.update()
 
@@ -181,7 +184,7 @@ def main(page: ft.Page):
                                 [
                                     progress_bar,
                                     ft.IconButton(
-                                        icon=ft.icons.DELETE,
+                                        icon=ft.Icons.DELETE,
                                         tooltip="Clear History",
                                         on_click=lambda _: clear_converted_files(),
                                     ),
