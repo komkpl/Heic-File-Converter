@@ -3,6 +3,8 @@ from PIL import Image
 import pillow_heif
 import os
 from pathlib import Path
+import subprocess
+import platform
 
 def make_output_path(input_path: Path, output_extention: str) -> Path:
     return Path(os.path.splitext(input_path)[0] + "." + output_extention)
@@ -21,6 +23,16 @@ def convert_heic_to_others(input_path: Path, output_extention: str) -> Path:
     print(f"変換完了: {output_path}")
     return output_path
 
+def open_file(path: Path):
+    try:
+        if platform.system() == "Windows":
+            os.startfile(path)
+        elif platform.system() == "Darwin": # macOS
+            subprocess.call(["open", path])
+        else: # Linux
+            subprocess.call(["xdg-open", path])
+    except Exception as e:
+        print(f"Error opening file: {path} -> {e}")
 
 def main(page: ft.Page):
     page.title = "HEIC to JPG Converter"
@@ -29,7 +41,7 @@ def main(page: ft.Page):
     progress_bar = ft.ProgressBar(width=400, value=0)
     progress_text = ft.Text(value="Progress: 0 / 0")
     selected_files = ft.Text()
-    converted_files = ft.Text()
+    converted_files = ft.Column(spacing=5, scroll=ft.ScrollMode.AUTO)
     selected_files.value = "No files selected"
 
     extensions = [
@@ -61,18 +73,26 @@ def main(page: ft.Page):
     def convert_button_clicked(e):
         total = len(selected_paths)
         if total == 0:
-            converted_files.value = "No files selected"
+            converted_files.controls.clear()
+            converted_files.controls.append(ft.Text("No files selected"))
             return
 
         output_extention = selected_extension.current.value or "jpg"
         for i, path in enumerate(selected_paths, start=1):
             try:
                 output_path = convert_heic_to_others(path, output_extention)
-                converted_files.value = f"変換完了: {output_path}"
+
+                # TextButtonを作成して、変換されたファイルを開く
+                btn = ft.TextButton(
+                    text=str(output_path),
+                    on_click=lambda e, p=output_path: open_file(p),
+                    style=ft.ButtonStyle(color=ft.colors.BLUE, overlay_color=ft.colors.BLUE_100),
+                )
+                converted_files.controls.append(btn)
 
             except Exception as e:
                 print(f"変換失敗: {path} -> {e}")
-                converted_files.value = f"変換失敗: {path} -> {e}"
+                converted_files.controls.append(ft.Text(f"変換失敗: {path} -> {e}", color=ft.colors.RED))
                 return
             
             # 進捗更新
