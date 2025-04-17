@@ -98,7 +98,7 @@ def main(page: ft.Page):
 
         output_extention = selected_extension.current.value or "jpg"
         print(converted_files.controls[0])
-        if "No history" == converted_files.controls[0].value:
+        if isinstance(converted_files.controls[0], ft.Text) and "No history" == converted_files.controls[0].value:
             converted_files.controls.clear()
         for i, path in enumerate(selected_paths, start=1):
             try:
