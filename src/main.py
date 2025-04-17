@@ -35,7 +35,7 @@ def open_file(path: Path):
         print(f"Error opening file: {path} -> {e}")
 
 def main(page: ft.Page):
-    page.title = "HEIC to Others Converter"
+    page.title = "HEIC to File Converter"
     selected_paths: list[str] = []
 
     progress_bar = ft.ProgressBar(width=400, value=0)
@@ -133,6 +133,9 @@ def main(page: ft.Page):
     def clear_converted_files():
         converted_files.controls.clear()
         converted_files.controls.append(ft.Text("No history", italic=True, color=ft.Colors.GREY))
+
+        progress_bar.value = 0
+        progress_text.value = "Progress: 0 / 0"
         show_snackbar("History cleared successfully")
         page.update()
 
