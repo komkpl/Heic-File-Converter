@@ -31,6 +31,14 @@ def main(page: ft.Page):
     selected_files = ft.Text()
     converted_files = ft.Text()
     selected_files.value = "No files selected"
+
+    extensions = [
+        "jpg",
+        "png",
+        "gif",
+        "tiff",
+    ]
+    selected_extension = ft.Ref[ft.Dropdown]()
     
     def pick_files_result(e: ft.FilePickerResultEvent):
         if not e.files:
@@ -55,9 +63,11 @@ def main(page: ft.Page):
         if total == 0:
             converted_files.value = "No files selected"
             return
+
+        output_extention = selected_extension.current.value or "jpg"
         for i, path in enumerate(selected_paths, start=1):
             try:
-                output_path = convert_heic_to_others(path, "jpg")
+                output_path = convert_heic_to_others(path, output_extention)
                 converted_files.value = f"変換完了: {output_path}"
 
             except Exception as e:
@@ -72,7 +82,13 @@ def main(page: ft.Page):
         
         progress_text.value += "✅ Done!"
         page.update()
-
+    
+    def get_extention_options():
+        return [ft.dropdown.Option(ext) for ext in extensions]
+    
+    def dropdown_changed(e):
+        e.control.value = e.control.selected_option.key
+        page.update()
 
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
     page.overlay.append(pick_files_dialog)
@@ -95,8 +111,16 @@ def main(page: ft.Page):
                                 ),
                             ),
                             selected_files,
+                            ft.Container(expand=True),
+                            ft.Dropdown(
+                                ref=selected_extension,
+                                label="Extension",
+                                options=get_extention_options(),
+                                value="jpg", # 初期値
+                            ),
                         ],
-                    ),
+                        alignment=ft.MainAxisAlignment.SPACE_BETWEEN,
+                        ),
                         ft.ElevatedButton(
                             "Convert",
                             icon=ft.Icons.SAVE,
