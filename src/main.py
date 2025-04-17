@@ -41,7 +41,11 @@ def main(page: ft.Page):
     progress_bar = ft.ProgressBar(width=400, value=0)
     progress_text = ft.Text(value="Progress: 0 / 0")
     selected_files = ft.Text()
-    converted_files = ft.Column(spacing=5, scroll=ft.ScrollMode.AUTO)
+    converted_files = ft.Column(
+        controls=[ft.Text("No History", italic=True, color=ft.colors.GREY)],
+        spacing=5, 
+        scroll=ft.ScrollMode.AUTO,
+        )
     selected_files.value = "No files selected"
 
     extensions = [
@@ -106,8 +110,9 @@ def main(page: ft.Page):
     def get_extention_options():
         return [ft.dropdown.Option(ext) for ext in extensions]
     
-    def dropdown_changed(e):
-        e.control.value = e.control.selected_option.key
+    def clear_converted_files():
+        converted_files.controls.clear()
+        converted_files.controls.append(ft.Text("No History", italic=True, color=ft.colors.GREY))
         page.update()
 
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
@@ -154,7 +159,17 @@ def main(page: ft.Page):
                 ft.Container(
                     content=ft.Column(
                         [
-                            ft.Row([progress_bar], alignment=ft.MainAxisAlignment.CENTER),
+                            ft.Row(
+                                [
+                                    progress_bar,
+                                    ft.IconButton(
+                                        icon=ft.icons.DELETE,
+                                        tooltip="Clear History",
+                                        on_click=lambda _: clear_converted_files(),
+                                    ),
+                                ], 
+                                alignment=ft.MainAxisAlignment.CENTER,
+                            ),
                             ft.Row([progress_text], alignment=ft.MainAxisAlignment.CENTER),
                         ],
                         spacing=5,
