@@ -35,7 +35,7 @@ def open_file(path: Path):
         print(f"Error opening file: {path} -> {e}")
 
 def main(page: ft.Page):
-    page.title = "HEIC to File Converter"
+    page.title = "HEIC File Converter"
     selected_paths: list[str] = []
 
     progress_bar = ft.ProgressBar(width=400, value=0)
