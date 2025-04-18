@@ -24,6 +24,7 @@ def convert_heic_to_others(input_path: Path, output_extention: str) -> Path:
     return output_path
 
 def open_file(path: Path):
+    path = path.parent
     try:
         if platform.system() == "Windows":
             os.startfile(path)
