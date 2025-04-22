@@ -139,7 +139,30 @@ def main(page: ft.Page):
         progress_text.value = "Progress: 0 / 0"
         show_snackbar("History cleared successfully")
         page.update()
+    
+    # ファイルドロップ
+    def on_drop(e: ft.DragTargetEvent):
+        selected_files.value = ""
+        selected_paths.clear()
+        for file in e.files:
+            selected_paths.append(file.path)
+            selected_files.value += f"{Path(file.path).name}"
+        page.update()
+        print("Dropped files:", selected_paths)
 
+    drop_target = ft.DragTarget(
+        content=ft.Container(
+            content=selected_files,
+            width=400,
+            height=200,
+            border=ft.border.all(2, ft.colors.BLUE),
+            border_radius=10,
+            alignment=ft.alignment.center,
+            padding=20,
+            bgcolor=ft.Colors.BLUE_50,
+        ),
+        on_accept=on_drop,
+    )
     pick_files_dialog = ft.FilePicker(on_result=pick_files_result)
     page.overlay.append(pick_files_dialog)
 
